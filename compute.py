@@ -29,18 +29,18 @@ def identificar(ip):
     mask=get_mask(ip)
     print("M.RED: "+mask)
 
-def get_subnet(ip,subredes=0,hosts=0,prefijo=0):
+def get_subnet(ip,subnets=0,hosts=0,prefix=0):
     mask=get_mask(ip)
     bytes_host=[i for i in mask.split(".") if i=="0"]
     host_bits=len(bytes_host)*8             #obtener bits disponibles
-    if prefijo>0:                           #si hay un prefijo
-        host_fijos=32-host_bits             #buscar host fijos
-        bits_req=prefijo-host_fijos         #bits_req=bits de la subred
-        subredes=2**bits_req-2              #asignar la subred para ese prefijo
+    if prefix>0:                            #si hay un prefix
+        static_host=32-host_bits            #buscar host fijos
+        bits_req=prefix-static_host         #bits_req=bits de la subnet
+        subnets=2**bits_req-2               #asignar la subnet para ese prefix
 
-    size=subredes or hosts                  #numero de ips para host o subredes
+    size=subnets or hosts                   #numero de ips para host o subnets
     if size>2:                              #si es posible hacer el logaritmo
-        n=math.log(size+2,2)                #host o subredes=2^n-2
+        n=math.log(size+2,2)                #host o subnets=2^n-2
         bits_available=math.ceil(n)         #redondear
         if host_bits-bits_available<0:      #si no es posible esa particion
             msg="No es posible"             #mandar mensaje de error
@@ -52,18 +52,29 @@ def get_subnet(ip,subredes=0,hosts=0,prefijo=0):
     complement_bits=host_bits-bits_available #bits restantes
     complement_ips=str(2**complement_bits-2) #ips restantes
 
-    subredes=ips if subredes else complement_ips  #diferenciar ips requeridas
-    hosts=ips if hosts else complement_ips        #con las sobrantes
+    num_subnets=ips if subnets else complement_ips  #diferenciar ips requeridas
+    num_hosts=ips if hosts else complement_ips      #con las sobrantes
 
-    return (subredes,hosts)
+    prefix=get_prefix(ip,num_subnets)
 
-def calcular(ip,subredes=0,hosts=0,prefijo=0):
-    msg=get_subnet(ip,subredes,hosts,prefijo)
+    return (num_subnets,num_hosts,prefix)
+
+def get_prefix(ip,num_subnets):
+    mask=get_mask(ip)
+    bytes_host=[i for i in mask.split(".") if i=="0"]
+    host_bits=len(bytes_host)*8              #obtener bits disponibles
+    bits_static_net=32-host_bits             #numero de bits estaticos red
+    n=math.log(int(num_subnets)+2,2)         #numero de bits estaticos subnet
+    bits_subnets=math.ceil(n)
+    return str(bits_subnets+bits_static_net)
+
+def calcular(ip,subnets=0,hosts=0,prefix=0):
+    msg=get_subnet(ip,subnets,hosts,prefix)
     print("Subredes: "+msg[0])
     print("Host: "+msg[1])
+    print("Prefix: "+msg[2])
 
 if __name__ == "__main__":
     ip="190.0.0.0"
     identificar(ip)
-    #calcular(ip,subredes=3)
-    calcular(ip,prefijo=25)
+    calcular(ip,hosts=100)
