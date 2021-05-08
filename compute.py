@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import math
+import re
 def get_class(ip):
     octetos=[int(i) for i in ip.split(".")]
     primeros_bits=bin(octetos[0])[2:].zfill(8)
@@ -40,7 +41,7 @@ def get_subnet(ip,subnets=0,hosts=0,prefix=0):
 
     size=subnets or hosts                   #dividimos segun cual es requerida
     bits_available=subdivision(mask,size)
-    
+
     complement_bits=host_bits-bits_available
     bits_subnets=bits_available if subnets else complement_bits
     bits_hosts=bits_available if hosts else complement_bits
@@ -48,7 +49,7 @@ def get_subnet(ip,subnets=0,hosts=0,prefix=0):
     prefix=get_prefix(ip,bits_subnets)      #numero de prefix
     num_subnets=str(2**bits_subnets-2)      #numero de subredes
     num_hosts=str(2**bits_hosts-2)          #numero de hosts
-    
+
     return (num_subnets,num_hosts,prefix)
 
 def subdivision(mask,size):
@@ -71,11 +72,20 @@ def get_prefix(ip,bits_subnets):
     bits_static_net=32-host_bits             #numero de bits estaticos red
     return str(bits_subnets+bits_static_net)
 
+def get_submask(prefix):
+    serie=int(prefix)*"1"                    #obtener la serie de unos
+    serie_="{:<032s}".format(serie)          #formato de 32 bits
+    byte=re.findall(".{8}",serie_)           #separar por bloques de un byte
+    submask=".".join([str(int(i,2)) for i in byte]) #obtener la mascara
+    return submask
+
 def calcular(ip,subnets=0,hosts=0,prefix=0):
     msg=get_subnet(ip,subnets,hosts,prefix)
     print("Subredes: "+msg[0])
     print("Host: "+msg[1])
     print("Prefix: "+msg[2])
+    submask=get_submask(msg[2])
+    print("M.subred: "+submask)
 
 if __name__ == "__main__":
     ip="190.0.0.0"
