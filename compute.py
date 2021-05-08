@@ -38,34 +38,37 @@ def get_subnet(ip,subnets=0,hosts=0,prefix=0):
         bits_req=prefix-static_host         #bits_req=bits de la subnet
         subnets=2**bits_req-2               #asignar la subnet para ese prefix
 
-    size=subnets or hosts                   #numero de ips para host o subnets
+    size=subnets or hosts                   #dividimos segun cual es requerida
+    bits_available=subdivision(mask,size)
+    
+    complement_bits=host_bits-bits_available
+    bits_subnets=bits_available if subnets else complement_bits
+    bits_hosts=bits_available if hosts else complement_bits
+
+    prefix=get_prefix(ip,bits_subnets)      #numero de prefix
+    num_subnets=str(2**bits_subnets-2)      #numero de subredes
+    num_hosts=str(2**bits_hosts-2)          #numero de hosts
+    
+    return (num_subnets,num_hosts,prefix)
+
+def subdivision(mask,size):
+    bytes_host=[i for i in mask.split(".") if i=="0"]
+    host_bits=len(bytes_host)*8             #obtener bits disponibles
     if size>2:                              #si es posible hacer el logaritmo
         n=math.log(size+2,2)                #host o subnets=2^n-2
         bits_available=math.ceil(n)         #redondear
         if host_bits-bits_available<0:      #si no es posible esa particion
-            msg="No es posible"             #mandar mensaje de error
-            return msg
+            return "No es posible"          #mandar mensaje de error
+        else:
+            return bits_available
     else:
-        msg="No es posible"
-        return msg
-    ips=str(2**bits_available-2)             #ips aprox. que solicitamos
-    complement_bits=host_bits-bits_available #bits restantes
-    complement_ips=str(2**complement_bits-2) #ips restantes
+        return "No es posible"
 
-    num_subnets=ips if subnets else complement_ips  #diferenciar ips requeridas
-    num_hosts=ips if hosts else complement_ips      #con las sobrantes
-
-    prefix=get_prefix(ip,num_subnets)
-
-    return (num_subnets,num_hosts,prefix)
-
-def get_prefix(ip,num_subnets):
+def get_prefix(ip,bits_subnets):
     mask=get_mask(ip)
     bytes_host=[i for i in mask.split(".") if i=="0"]
     host_bits=len(bytes_host)*8              #obtener bits disponibles
     bits_static_net=32-host_bits             #numero de bits estaticos red
-    n=math.log(int(num_subnets)+2,2)         #numero de bits estaticos subnet
-    bits_subnets=math.ceil(n)
     return str(bits_subnets+bits_static_net)
 
 def calcular(ip,subnets=0,hosts=0,prefix=0):
