@@ -5,7 +5,15 @@ naranja="#F98430"
 verde="#68A048"
 root=Tk()
 root.title("Calculadora de ips")
-root.geometry("610x400")
+
+app_width=610
+app_height=400
+screen_width=root.winfo_screenwidth()
+screen_height=root.winfo_screenheight()
+app_posx=int(screen_width/2-app_width/2)
+app_posy=int(screen_height/2-app_height/2)
+root.geometry(f"{app_width}x{app_height}+{app_posx}+{app_posy}")
+
 root['background']='#075085'
 frame=Frame(root,background=azul,highlightbackground=azul, highlightcolor=azul,highlightthickness=20)
 frame.pack(fill=None, expand=False)
