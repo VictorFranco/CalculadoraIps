@@ -93,12 +93,21 @@ def array_subnets(ip,subnets,prefix):
     ip_bytes=ip_bytes[:long_host]+(4-long_host)*["0"]           #limpiar area de host
     ip_bits=ip_to_bits(ip_bytes)
     array_subnets=[]
-    for i in range(1,int(subnets)+1):                           #recorrer numeros de host          
+    for i in range(1,int(subnets)+1):                           #recorrer numeros de subnets
         serie=(long_host)*8*"0"+bin(i)[2:].zfill(int(prefix)-long_host*8) #crear ip con las subredes
         serie_="{:<032s}".format(serie)                         #32 bits de ip
         bits_subnet=bin(int(str(ip_bits),2)|int(serie_,2))[2:]  #deducir apartir de bits
         array_subnets.append(bits_to_ip(bits_subnet))
     return array_subnets
+
+def array_hosts(ip_subnet,subnets):
+    ip_bits=ip_to_bits(ip_subnet.split("."))                    #obtener bits de ip_subnet
+    array_hosts=[]
+    for i in range(1,int(subnets)+1):                           #recorrer numeros de hosts
+        serie_=bin(i)[2:].zfill(32)                             #pasarlos a bits
+        bits_host=bin(int(str(ip_bits),2)|int(serie_,2))[2:]    #obtener ips de host
+        array_hosts.append(bits_to_ip(bits_host))
+    return array_hosts
 
 def calcular(ip,subnets=0,hosts=0,prefix=0):
     msg=get_subnet(ip,subnets,hosts,prefix)
@@ -107,8 +116,12 @@ def calcular(ip,subnets=0,hosts=0,prefix=0):
     print("Prefix: "+msg[2])
     submask=get_submask(msg[2])
     print("M.subred: "+submask)
-    addresses=array_subnets(ip,msg[0],msg[2])
-    for address in addresses:
+    subnets_=array_subnets(ip,msg[0],msg[2])
+    hosts_=array_hosts("190.1.58.128",msg[1])
+    for address in subnets_:
+        print(address)
+    print(30*"=")
+    for address in hosts_:
         print(address)
 
 if __name__ == "__main__":
