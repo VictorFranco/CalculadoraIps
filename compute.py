@@ -3,16 +3,16 @@ import math
 import re
 def get_class(ip):
     octetos=[int(i) for i in ip.split(".")]
-    primeros_bits=bin(octetos[0])[2:].zfill(8)
-    if primeros_bits[:1]=="0":        #1-127
+    bits=ip_to_bits(octetos)
+    if bits[:1]=="0":        #1-127
         return "Clase A"
-    if primeros_bits[:2]=="10":       #128-191
+    if bits[:2]=="10":       #128-191
         return "Clase B"
-    if primeros_bits[:3]=="110":      #191-223
+    if bits[:3]=="110":      #191-223
         return "Clase C"
-    if primeros_bits[:4]=="1110":     #224-239
+    if bits[:4]=="1110":     #224-239
         return "Clase D"
-    if primeros_bits[:4]=="1111":     #240-255
+    if bits[:4]=="1111":     #240-255
         return "Clase E"
 
 def get_mask(ip):
@@ -72,12 +72,33 @@ def get_prefix(ip,bits_subnets):
     bits_static_net=32-host_bits             #numero de bits estaticos red
     return str(bits_subnets+bits_static_net)
 
+def ip_to_bits(ip_bytes):                                   #recibir un array con las ips
+    array_bin=[bin(int(i))[2:].zfill(8) for i in ip_bytes]  #convertir los elementos en bits
+    serie="".join(array_bin)
+    return "{:<032s}".format(serie)
+
+def bits_to_ip(bits):
+    serie_="{:<032s}".format(bits)                 #formato de 32 bits
+    byte=re.findall(".{8}",serie_)                 #separar por bloques de un byte
+    return ".".join([str(int(i,2)) for i in byte]) #obtener la mascara
+
 def get_submask(prefix):
     serie=int(prefix)*"1"                    #obtener la serie de unos
-    serie_="{:<032s}".format(serie)          #formato de 32 bits
-    byte=re.findall(".{8}",serie_)           #separar por bloques de un byte
-    submask=".".join([str(int(i,2)) for i in byte]) #obtener la mascara
-    return submask
+    return bits_to_ip(serie)
+
+def array_subnets(ip,subnets,prefix):
+    mask=get_mask(ip)                                           #obtener mask
+    long_host=len([i for i in mask.split(".") if i=="255"])     #size array fijo
+    ip_bytes=ip.split(".")                                      #ip en array
+    ip_bytes=ip_bytes[:long_host]+(4-long_host)*["0"]           #limpiar area de host
+    ip_bits=ip_to_bits(ip_bytes)
+    array_subnets=[]
+    for i in range(1,int(subnets)+1):                           #recorrer numeros de host          
+        serie=(long_host)*8*"0"+bin(i)[2:].zfill(int(prefix)-long_host*8) #crear ip con las subredes
+        serie_="{:<032s}".format(serie)                         #32 bits de ip
+        bits_subnet=bin(int(str(ip_bits),2)|int(serie_,2))[2:]  #deducir apartir de bits
+        array_subnets.append(bits_to_ip(bits_subnet))
+    return array_subnets
 
 def calcular(ip,subnets=0,hosts=0,prefix=0):
     msg=get_subnet(ip,subnets,hosts,prefix)
@@ -86,8 +107,11 @@ def calcular(ip,subnets=0,hosts=0,prefix=0):
     print("Prefix: "+msg[2])
     submask=get_submask(msg[2])
     print("M.subred: "+submask)
+    addresses=array_subnets(ip,msg[0],msg[2])
+    for address in addresses:
+        print(address)
 
 if __name__ == "__main__":
-    ip="190.0.0.0"
+    ip="190.1.0.0"
     identificar(ip)
     calcular(ip,hosts=100)
