@@ -3,11 +3,22 @@ from tkinter import *
 import compute
 import re
 
+option=0
+def set_option(num):
+    global option
+    option=num
+    for i in range(3):
+        if i==option:
+            btn[option]['background']=naranja_fuerte
+        else:
+            btn[i]['background']=naranja
+    search_information("")
+
 def search_information(event):
     ip=display1.get()
     is_ip = re.search(r"^([0-9]{1,3}\.){3}[0-9]{1,3}$",ip)#regex de una ip
     if not is_ip:                   #si no es una ip
-        label2['text']="\n"         #limpiar lables
+        label2['text']="\n"         #limpiar labels
         label3['text']=""
         return 0
     clase=compute.get_class(ip)
@@ -19,7 +30,12 @@ def search_information(event):
     if not is_num:                            #si no es un numero
         label3['text']=""                     #limpiar
         return 0
-    sub=compute.get_subnet(display1.get(),subnets=int(num))
+    if option==0:
+        sub=compute.get_subnet(display1.get(),hosts=int(num))
+    elif option==1:
+        sub=compute.get_subnet(display1.get(),subnets=int(num))
+    else:
+        sub=compute.get_subnet(display1.get(),prefix=int(num))
     new_state="Subredes: "+sub[0]+"\n"        
     new_state+="Host: "+sub[1]+"\n"           
     #new_state+="Prefix: "+sub[2]+"\n"
@@ -29,6 +45,7 @@ def search_information(event):
 
 azul="#5597D4"
 naranja="#F98430"
+naranja_fuerte="#f9c62f"
 verde="#68A048"
 root=Tk()
 root.title("Calculadora de ips")
@@ -56,12 +73,17 @@ display2.bind("<Return>",search_information)
 
 frame2=Frame(frame)
 frame2.grid(row=3,column=0)
-btn1=Button(frame2,text="Host",background=naranja,highlightbackground="#000",highlightthickness=1)
-btn1.grid(row=3,column=0,sticky=W+E)
-btn2=Button(frame2,text="Subred",background=naranja,highlightbackground="#000",highlightthickness=1)
-btn2.grid(row=4,column=0,sticky=W+E)
-btn3=Button(frame2,text="Prefijo",background=naranja,highlightbackground="#000",highlightthickness=1)
-btn3.grid(row=5,column=0,sticky=W+E)
+btn=[]
+for i in range(3):
+    btn.append(Button(frame2,text="Host",background=naranja,highlightbackground="#000",highlightthickness=1,cursor="hand1"))
+    btn[i].grid(row=3+i,column=0,sticky=W+E)
+btn[0]['background']=naranja_fuerte
+btn[0]['text']="Host"
+btn[1]['text']="Subred"
+btn[2]['text']="Prefijo"
+btn[0]['command']=lambda:set_option(0)
+btn[1]['command']=lambda:set_option(1)
+btn[2]['command']=lambda:set_option(2)
 
 label2=Label(frame,text="\n",background=verde,highlightbackground="#000",highlightthickness=1)
 label2.grid(row=1,column=9,rowspan=2,sticky=W+E+N,pady=(0,20))
