@@ -1,5 +1,32 @@
 #!/usr/bin/python3
 from tkinter import *
+import compute
+import re
+
+def search_information(event):
+    ip=display1.get()
+    is_ip = re.search(r"^([0-9]{1,3}\.){3}[0-9]{1,3}$",ip)#regex de una ip
+    if not is_ip:                   #si no es una ip
+        label2['text']="\n"         #limpiar lables
+        label3['text']=""
+        return 0
+    clase=compute.get_class(ip)
+    mask=compute.get_mask(ip)
+    new_state=clase+"\n"+mask
+    label2['text']=new_state                  #mostrar informacion
+    num=display2.get()                        #obtener contenido
+    is_num = re.search(r"^[1-9][0-9]*$",num)  #regex validar que es un numero
+    if not is_num:                            #si no es un numero
+        label3['text']=""                     #limpiar
+        return 0
+    sub=compute.get_subnet(display1.get(),subnets=int(num))
+    new_state="Subredes: "+sub[0]+"\n"        
+    new_state+="Host: "+sub[1]+"\n"           
+    #new_state+="Prefix: "+sub[2]+"\n"
+    submask=compute.get_submask(sub[2])       
+    new_state+="M.subred: "+submask           
+    label3['text']=new_state                  #mostrar informacion
+
 azul="#5597D4"
 naranja="#F98430"
 verde="#68A048"
@@ -22,8 +49,10 @@ label1=Label(frame,text="Dir IP",background=naranja,highlightbackground="#000",h
 label1.grid(row=1,column=0,sticky=W+E,pady=(0,20))
 display1=Entry(frame)
 display1.grid(row=1,column=2,columnspan=6,sticky=W+E,padx=15,pady=(0,20))
+display1.bind("<Return>",search_information)
 display2=Entry(frame)
 display2.grid(row=3,column=2,columnspan=6,sticky=W+E+N,padx=15,pady=(0,20))
+display2.bind("<Return>",search_information)
 
 frame2=Frame(frame)
 frame2.grid(row=3,column=0)
@@ -34,13 +63,14 @@ btn2.grid(row=4,column=0,sticky=W+E)
 btn3=Button(frame2,text="Prefijo",background=naranja,highlightbackground="#000",highlightthickness=1)
 btn3.grid(row=5,column=0,sticky=W+E)
 
-label2=Label(frame,text="",background=verde,highlightbackground="#000",highlightthickness=1)
+label2=Label(frame,text="\n",background=verde,highlightbackground="#000",highlightthickness=1)
 label2.grid(row=1,column=9,rowspan=2,sticky=W+E+N,pady=(0,20))
 label3=Label(frame,text="",background=verde,highlightbackground="#000",highlightthickness=1)
 label3.grid(row=3,column=9,sticky=W+E+S+N)
 
-label3=Label(frame,text="Lista de subredes",highlightbackground="#000",highlightthickness=1)
-label3.grid(row=6,column=0,columnspan=8,sticky=W+E,padx=(0,15),pady=20)
+label8=Label(frame,text="Lista de subredes",highlightbackground="#000",highlightthickness=1)
+label8.grid(row=6,column=0,columnspan=8,sticky=W+E,padx=(0,15),pady=20)
+
 label4=Label(frame,text="  Lista de host de la subred 200  ",highlightbackground="#000",highlightthickness=1)
 label4.grid(row=6,column=9,sticky=W+E)
 
