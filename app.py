@@ -9,7 +9,7 @@ def set_option(num):
     option=num
     for i in range(3):
         if i==option:
-            btn[option]['background']=naranja_fuerte
+            btn[option]['background']=amarillo
         else:
             btn[i]['background']=naranja
     search_information("")
@@ -42,10 +42,45 @@ def search_information(event):
     submask=compute.get_submask(sub[2])       
     new_state+="M.subred: "+submask           
     label3['text']=new_state                  #mostrar informacion
+    for widget in frame3.winfo_children():
+        widget.destroy()
+    for widget in frame5.winfo_children():
+        widget.destroy()
+    subnets_=compute.array_subnets(ip,sub[0],sub[2])
+    hosts_=compute.array_hosts(subnets_[0],sub[1])
+    new_frame=create_scroll_frame(frame3,len(subnets_))
+    new_frame2=create_scroll_frame(frame5,len(hosts_))
+    for i,subnets in enumerate(subnets_):
+        btn1=Button(new_frame,text=f'{i+1} --> {subnets}',command=lambda i=i,hosts=sub[1]:set_subnet(i,subnets_,hosts),background=verde,highlightbackground="#000",highlightthickness=1,cursor="hand1")
+        btn1.place(x=0,y=31*i,width=240)
+    for i,hosts in enumerate(hosts_):
+        btn1=Button(new_frame2,text=f'{i+1} --> {hosts}',background=verde,highlightbackground="#000",highlightthickness=1,cursor="hand1")
+        btn1.place(x=0,y=31*i,width=203)
+
+def set_subnet(index,subnets_,hosts):
+    for widget in frame5.winfo_children():
+        widget.destroy()
+    hosts_=compute.array_hosts(subnets_[int(index)],hosts)
+    new_frame2=create_scroll_frame(frame5,len(hosts_))
+    for i,hosts in enumerate(hosts_):
+        btn1=Button(new_frame2,text=f'{i+1} --> {hosts}',background=verde,highlightbackground="#000",highlightthickness=1,cursor="hand1")
+        btn1.place(x=0,y=31*i,width=203)
+    
+def create_scroll_frame(frame,size):
+    my_canvas=Canvas(frame)
+    my_canvas.pack(side=LEFT,fill=BOTH,expand=1)
+    my_scrollbar=Scrollbar(frame,orient=VERTICAL,command=my_canvas.yview)
+    my_scrollbar.pack(side=RIGHT,fill=Y)
+    my_canvas.configure(yscrollcommand=my_scrollbar.set,width=200,height=123)
+    my_canvas.bind('<Configure>',lambda e:my_canvas.configure(scrollregion=my_canvas.bbox("all")))
+    new_frame=Frame(my_canvas,background=azul,width=300,height=31*int(size))
+    new_frame.pack(fill=BOTH, expand=True)
+    my_canvas.create_window((0,0),window=new_frame,anchor="nw")
+    return new_frame
 
 azul="#5597D4"
 naranja="#F98430"
-naranja_fuerte="#f9c62f"
+amarillo="#f9c62f"
 verde="#68A048"
 root=Tk()
 root.title("Calculadora de ips")
@@ -75,15 +110,12 @@ frame2=Frame(frame)
 frame2.grid(row=3,column=0)
 btn=[]
 for i in range(3):
-    btn.append(Button(frame2,text="Host",background=naranja,highlightbackground="#000",highlightthickness=1,cursor="hand1"))
+    btn.append(Button(frame2,text="Host",command=lambda i=i:set_option(i),background=naranja,highlightbackground="#000",highlightthickness=1,cursor="hand1"))
     btn[i].grid(row=3+i,column=0,sticky=W+E)
-btn[0]['background']=naranja_fuerte
+btn[0]['background']=amarillo
 btn[0]['text']="Host"
 btn[1]['text']="Subred"
 btn[2]['text']="Prefijo"
-btn[0]['command']=lambda:set_option(0)
-btn[1]['command']=lambda:set_option(1)
-btn[2]['command']=lambda:set_option(2)
 
 label2=Label(frame,text="\n",background=verde,highlightbackground="#000",highlightthickness=1)
 label2.grid(row=1,column=9,rowspan=2,sticky=W+E+N,pady=(0,20))
@@ -99,34 +131,9 @@ label4.grid(row=6,column=9,sticky=W+E)
 frame3=Frame(frame)
 frame3.grid(row=7,column=0,columnspan=8,sticky=W+E,padx=(0,15))
 frame3.columnconfigure(0, weight = 1)
-my_canvas=Canvas(frame3)
-my_canvas.pack(side=LEFT,fill=BOTH,expand=1)
-my_scrollbar=Scrollbar(frame3,orient=VERTICAL,command=my_canvas.yview)
-my_scrollbar.pack(side=RIGHT,fill=Y)
-my_canvas.configure(yscrollcommand=my_scrollbar.set,width=200,height=123)
-my_canvas.bind('<Configure>',lambda e:my_canvas.configure(scrollregion=my_canvas.bbox("all")))
-frame4=Frame(my_canvas,background=azul,width=300,height=31*10)
-frame4.pack(fill=BOTH, expand=True)
-my_canvas.create_window((0,0),window=frame4,anchor="nw")
-for i in range(10):
-    btn1=Button(frame4,text=f'{i} --> 190.0.{i}.0',background=verde,highlightbackground="#000",highlightthickness=1)
-    btn1.place(x=0,y=31*i,width=240)
 
 frame5=Frame(frame)
 frame5.grid(row=7,column=9,columnspan=8,sticky=W+E)
 frame5.columnconfigure(0, weight = 1)
-my_canvas2=Canvas(frame5)
-my_canvas2.pack(side=LEFT,fill=BOTH,expand=1)
-my_scrollbar=Scrollbar(frame5,orient=VERTICAL,command=my_canvas2.yview)
-my_scrollbar.pack(side=RIGHT,fill=Y)
-my_canvas2.configure(yscrollcommand=my_scrollbar.set,width=200,height=123)
-my_canvas2.bind('<Configure>',lambda e:my_canvas2.configure(scrollregion=my_canvas2.bbox("all")))
-frame6=Frame(my_canvas2,background=azul,width=300,height=31*10)
-frame6.pack(fill=BOTH, expand=True)
-my_canvas2.create_window((0,0),window=frame6,anchor="nw")
-for i in range(10):
-    btn1=Button(frame6,text=f'{i} --> 190.0.1.{i}',background=verde,highlightbackground="#000",highlightthickness=1)
-    btn1.place(x=0,y=31*i,width=203)
 
-#root.resizable(False, False)
 root.mainloop()

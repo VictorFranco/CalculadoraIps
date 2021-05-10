@@ -100,10 +100,10 @@ def array_subnets(ip,subnets,prefix):
         array_subnets.append(bits_to_ip(bits_subnet))
     return array_subnets
 
-def array_hosts(ip_subnet,subnets):
+def array_hosts(ip_subnet,hosts):
     ip_bits=ip_to_bits(ip_subnet.split("."))                    #obtener bits de ip_subnet
     array_hosts=[]
-    for i in range(1,int(subnets)+1):                           #recorrer numeros de hosts
+    for i in range(1,int(hosts)+1):                             #recorrer numeros de hosts
         serie_=bin(i)[2:].zfill(32)                             #pasarlos a bits
         bits_host=bin(int(str(ip_bits),2)|int(serie_,2))[2:]    #obtener ips de host
         array_hosts.append(bits_to_ip(bits_host))
