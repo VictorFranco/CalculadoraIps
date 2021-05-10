@@ -71,7 +71,7 @@ def set_subnet(index,subnets_,hosts):
     label4['text']="{:^32}".format("Lista de host de la subred "+msg)  #mostrar nuevo mensaje
 
 def create_scroll_frame(frame,size):
-    my_canvas=Canvas(frame)
+    my_canvas=Canvas(frame,background=fondo)
     my_canvas.pack(side=LEFT,fill=BOTH,expand=1)
     my_scrollbar=Scrollbar(frame,orient=VERTICAL,command=my_canvas.yview)
     my_scrollbar.pack(side=RIGHT,fill=Y)
@@ -83,6 +83,7 @@ def create_scroll_frame(frame,size):
     return new_frame                                                   #devolver frame con scroll
 
 azul="#5597D4"
+fondo="#075085"
 naranja="#F98430"
 amarillo="#f9c62f"
 verde="#68A048"
@@ -97,7 +98,7 @@ app_posx=int(screen_width/2-app_width/2)
 app_posy=int(screen_height/2-app_height/2)
 root.geometry(f"{app_width}x{app_height}+{app_posx}+{app_posy}")   #dimensiones de ventana
 
-root['background']='#075085'
+root['background']=fondo
 frame=Frame(root,background=azul,highlightbackground=azul, highlightcolor=azul,highlightthickness=20)
 frame.pack(fill=None, expand=False)
 
@@ -135,9 +136,11 @@ label4.grid(row=6,column=9,sticky=W+E)
 frame3=Frame(frame)                                                 #panel subredes
 frame3.grid(row=7,column=0,columnspan=8,sticky=W+E,padx=(0,15))
 frame3.columnconfigure(0, weight = 1)
+new_frame=create_scroll_frame(frame3,0)     #crear area de scroll para subnets
 
 frame5=Frame(frame)                                                 #panel hosts
 frame5.grid(row=7,column=9,columnspan=8,sticky=W+E)
 frame5.columnconfigure(0, weight = 1)
+new_frame2=create_scroll_frame(frame5,0)      #crear area de scroll para hosts
 
 root.mainloop()
