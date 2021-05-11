@@ -13,9 +13,9 @@ def set_option(num):
             btn[option]['background']=amarillo
         else:
             btn[i]['background']=naranja
-    search_information("")          #actualizar informacion mostrada
+    search_information()            #actualizar informacion mostrada
 
-def search_information(event):
+def search_information(event=None):
     ip=display1.get()
     is_ip = re.search(r"^([0-9]{1,3}\.){3}[0-9]{1,3}$",ip)#regex de una ip
     if not is_ip:                   #si no es una ip
@@ -31,29 +31,29 @@ def search_information(event):
     if not is_num:                            #si no es un numero
         label3['text']=""                     #limpiar
         return 0
-    if option==0:
-        sub=compute.get_subnet(display1.get(),hosts=int(num))      #segun el tipo de busqueda
-    elif option==1:
-        sub=compute.get_subnet(display1.get(),subnets=int(num))    #obtenemos el calculo de subred
+    if option==0:                             #segun el tipo de busqueda
+        (num_subnets,num_hosts,prefix)=compute.get_subnet(display1.get(),hosts=int(num))  
+    elif option==1:                           #obtenemos el calculo de subred
+        (num_subnets,num_hosts,prefix)=compute.get_subnet(display1.get(),subnets=int(num))
     else:
-        sub=compute.get_subnet(display1.get(),prefix=int(num))
-    new_state="Subredes: "+sub[0]+"\n"
-    new_state+="Host: "+sub[1]+"\n"
-    #new_state+="Prefix: "+sub[2]+"\n"
-    submask=compute.get_submask(sub[2])
+        (num_subnets,num_hosts,prefix)=compute.get_subnet(display1.get(),prefix=int(num))
+    new_state="Subredes: "+num_subnets+"\n"
+    new_state+="Host: "+num_hosts+"\n"
+    #new_state+="Prefix: "+prefix+"\n"
+    submask=compute.get_submask(prefix)
     new_state+="M.subred: "+submask
     label3['text']=new_state                  #mostrar informacion de subred
     for widget in frame3.winfo_children():
         widget.destroy()
     for widget in frame5.winfo_children():
         widget.destroy()
-    subnets_=compute.array_subnets(ip,sub[0],sub[2])
-    hosts_=compute.array_hosts(subnets_[0],sub[1])
+    subnets_=compute.array_subnets(ip,num_subnets,prefix)   #obtener array subnets
+    hosts_=compute.array_hosts(subnets_[0],num_hosts)       #obtener array hosts
     label4['text']="{:^32}".format("Lista de host de la subred   1")
     new_frame=create_scroll_frame(frame3,len(subnets_))     #crear area de scroll para subnets
     new_frame2=create_scroll_frame(frame5,len(hosts_))      #crear area de scroll para hosts
     for i,subnets in enumerate(subnets_):
-        btn1=Button(new_frame,text=f'{i+1} --> {subnets}',command=lambda i=i,hosts=sub[1]:set_subnet(i,subnets_,hosts),background=verde,highlightbackground="#000",highlightthickness=1,cursor="hand1")
+        btn1=Button(new_frame,text=f'{i+1} --> {subnets}/{prefix}',command=lambda i=i,hosts=num_hosts:set_subnet(i,subnets_,hosts),background=verde,highlightbackground="#000",highlightthickness=1,cursor="hand1")
         btn1.place(x=0,y=31*i,width=240)
     for i,hosts in enumerate(hosts_):
         btn1=Button(new_frame2,text=f'{i+1} --> {hosts}',background=verde,highlightbackground="#000",highlightthickness=1,cursor="hand1")
