@@ -23,6 +23,7 @@ def get_mask(ip):
         return "255.255.0.0"
     if clase=="Clase C":
         return "255.255.255.0"
+    return ""
 
 def identificar(ip):
     clase=get_class(ip)
@@ -32,6 +33,9 @@ def identificar(ip):
 
 def get_subnet(ip,subnets=0,hosts=0,prefix=0):
     mask=get_mask(ip)
+    if not mask:
+        return (None,)*3
+
     bytes_host=[i for i in mask.split(".") if i=="0"]
     host_bits=len(bytes_host)*8             #obtener bits disponibles
     mask_bits=ip_to_bits(mask.split("."))
