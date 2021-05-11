@@ -47,29 +47,25 @@ def search_information(event=None):
         return -1
     new_state="Subredes: "+num_subnets+"\n"
     new_state+="Host: "+num_hosts+"\n"
-    #new_state+="Prefix: "+prefix+"\n"
     submask=compute.get_submask(prefix)
     new_state+="M.subred: "+submask
     label3['text']=new_state                  #mostrar informacion de subred
     subnets_=compute.array_subnets(ip,num_subnets,prefix)   #obtener array subnets
-    hosts_=compute.array_hosts(subnets_[0],num_hosts)       #obtener array hosts
     label4['text']="{:^32}".format("Lista de host de la subred   1")
     new_frame=create_scroll_frame(frame3,len(subnets_))     #crear area de scroll para subnets
-    new_frame2=create_scroll_frame(frame5,len(hosts_))      #crear area de scroll para hosts
+    set_subnet(ip,0,subnets_,num_hosts)                     #mostrar hosts de la subred en 0
     for i,subnets in enumerate(subnets_):
-        btn1=Button(new_frame,text=f'{i+1} --> {subnets}/{prefix}',command=lambda i=i,hosts=num_hosts:set_subnet(i,subnets_,hosts),background=verde,highlightbackground="#000",highlightthickness=1,cursor="hand1")
+        btn1=Button(new_frame,text=f'{i+1} --> {subnets}/{prefix}',command=lambda ip=ip,i=i,hosts=num_hosts:set_subnet(ip,i,subnets_,hosts),background=verde,highlightbackground="#000",highlightthickness=1,cursor="hand1")
         btn1.place(x=0,y=31*i,width=240)                    #llenar lista de subnets
-    for i,hosts in enumerate(hosts_):
-        btn1=Button(new_frame2,text=f'{i+1} --> {hosts}',background=verde,highlightbackground="#000",highlightthickness=1,cursor="hand1")
-        btn1.place(x=0,y=31*i,width=216)                    #llenar lista de hosts
 
 def reset_content_scroll(frame):
     for widget in frame.winfo_children():
         widget.destroy()                                    #limpiar contenido
 
-def set_subnet(index,subnets_,hosts):
+def set_subnet(ip,index,subnets_,hosts):
     reset_content_scroll(frame5)                            #borrar contenido
-    hosts_=compute.array_hosts(subnets_[int(index)],hosts)  #obtener nuevos datos
+    ip=subnets_[int(index)] if subnets_ else ip             #si no hay la subredes mandar la ip original
+    hosts_=compute.array_hosts(ip,hosts)                    #obtener nuevos datos
     new_frame2=create_scroll_frame(frame5,len(hosts_))      #crear nueva area de scroll
     for i,hosts in enumerate(hosts_):
         btn1=Button(new_frame2,text=f'{i+1} --> {hosts}',background=verde,highlightbackground="#000",highlightthickness=1,cursor="hand1")
