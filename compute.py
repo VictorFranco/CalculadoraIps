@@ -34,13 +34,18 @@ def get_subnet(ip,subnets=0,hosts=0,prefix=0):
     mask=get_mask(ip)
     bytes_host=[i for i in mask.split(".") if i=="0"]
     host_bits=len(bytes_host)*8             #obtener bits disponibles
-    if prefix>0:                            #si hay un prefix
+    mask_bits=ip_to_bits(mask.split("."))
+    if 32>prefix>len(mask_bits.split("1")): #si el prefijo esta en el rango
         static_host=32-host_bits            #buscar host fijos
         bits_req=prefix-static_host         #bits_req=bits de la subnet
         subnets=2**bits_req-2               #asignar la subnet para ese prefix
+    elif prefix!=0:
+        return (None,)*3
 
     size=subnets or hosts                   #dividimos segun cual es requerida
     bits_available=subdivision(mask,size)
+    if not bits_available:
+        return (None,)*3
 
     complement_bits=host_bits-bits_available
     bits_subnets=bits_available if subnets else complement_bits
@@ -54,16 +59,13 @@ def get_subnet(ip,subnets=0,hosts=0,prefix=0):
 
 def subdivision(mask,size):
     bytes_host=[i for i in mask.split(".") if i=="0"]
-    host_bits=len(bytes_host)*8             #obtener bits disponibles
+    host_bits=len(bytes_host)*8             #numero de bits de host de la red
     if size>2:                              #si es posible hacer el logaritmo
         n=math.log(size+2,2)                #host o subnets=2^n-2
-        bits_available=math.ceil(n)         #redondear
-        if host_bits-bits_available<0:      #si no es posible esa particion
-            return "No es posible"          #mandar mensaje de error
-        else:
-            return bits_available
-    else:
-        return "No es posible"
+        bits_required=math.ceil(n)          #redondear
+        if host_bits-bits_required>0:       #si es posible la particion
+            return bits_required
+    return None
 
 def get_prefix(ip,bits_subnets):
     mask=get_mask(ip)
@@ -110,14 +112,17 @@ def array_hosts(ip_subnet,hosts):
     return array_hosts
 
 def calcular(ip,subnets=0,hosts=0,prefix=0):
-    msg=get_subnet(ip,subnets,hosts,prefix)
-    print("Subredes: "+msg[0])
-    print("Host: "+msg[1])
-    print("Prefix: "+msg[2])
-    submask=get_submask(msg[2])
+    (subnets,hosts,prefix)=get_subnet(ip,subnets,hosts,prefix)
+    if not subnets:
+        print("Error")
+        return -1
+    print("Subredes: "+subnets)
+    print("Host: "+hosts)
+    print("Prefix: "+prefix)
+    submask=get_submask(prefix)
     print("M.subred: "+submask)
-    subnets_=array_subnets(ip,msg[0],msg[2])
-    hosts_=array_hosts("190.1.58.128",msg[1])
+    subnets_=array_subnets(ip,subnets,prefix)
+    hosts_=array_hosts("190.1.58.128",hosts)
     for address in subnets_:
         print(address)
     print(30*"=")
