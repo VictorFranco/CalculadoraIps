@@ -16,8 +16,8 @@ def set_option(num):
     search_information()            #actualizar informacion mostrada
 
 def search_information(event=None):
-    ip=display1.get()
-    is_ip = re.search(r"^([0-9]{1,3}\.){3}[0-9]{1,3}$",ip)#regex de una ip
+    ip=display1.get()               #usar regex de una ip para validar
+    is_ip = re.search(r"^((25[0-5]|2[0-4][0-9]|[1]?[0-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|[1]?[0-9]?[0-9])$",ip)
     if not is_ip:                   #si no es una ip
         label2['text']="\n"         #limpiar labels
         label3['text']=""
