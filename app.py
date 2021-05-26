@@ -146,7 +146,7 @@ label_subredes.grid(row=3,column=9,sticky=W+E+S+N)
 list_font=font.Font(family="Consolas",size=9,weight="bold")#labels de las listas
 label8=Label(frame,text="{:^32}".format("Lista de subredes"),font=list_font,highlightbackground="#000",highlightthickness=1)
 label8.grid(row=6,column=0,columnspan=8,sticky=W+E,padx=(0,15),pady=20)
-label_hosts=Label(frame,text="{:^32}".format("Lista de host de la subred    "),font=list_font,highlightbackground="#000",highlightthickness=1)
+label_hosts=Label(frame,text="{:^32}".format("Lista de host de la subred   0"),font=list_font,highlightbackground="#000",highlightthickness=1)
 label_hosts.grid(row=6,column=9,sticky=W+E)
 
 frame_subnets=Frame(frame)                                 #panel subredes
