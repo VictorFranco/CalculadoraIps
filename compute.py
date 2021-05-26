@@ -119,7 +119,8 @@ def array_hosts(ip_subnet,hosts):
     array_hosts=[]
     for i in range(1,int(hosts)+1):                             #recorrer numeros de hosts
         serie_=bin(i)[2:].zfill(32)                             #pasarlos a bits
-        bits_host=bin(int(str(ip_bits),2)|int(serie_,2))[2:]    #obtener ips de host
+        bits_host=bin(int(str(ip_bits),2)|int(str(serie_),2))   #obtener ips de host
+        bits_host=bits_host[2:].zfill(32)
         array_hosts.append(bits_to_ip(bits_host))
     return array_hosts
 
