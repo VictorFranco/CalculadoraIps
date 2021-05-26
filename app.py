@@ -3,6 +3,7 @@ from tkinter import *
 import compute
 import re
 from tkinter import font
+from tkinter import messagebox
 
 option=0
 def set_option(num):
@@ -51,6 +52,10 @@ def search_information(event=None):
     new_state+="M.subred: "+submask
     label_subredes['text']=new_state          #mostrar informacion de subred
     subnets_=compute.array_subnets(ip,num_subnets,prefix)          #obtener array subnets
+    if len(subnets_)>1024:
+        messagebox.showinfo("Demasiados resultados","Se muestra una parte de las subredes")
+        subnets_=subnets_[:1024]
+
     label_hosts['text']="{:^32}".format("Lista de host de la subred   1")
     new_frame=create_scroll_frame(frame_subnets,len(subnets_))     #crear area de scroll para subnets
     set_subnet(ip,0,subnets_,num_hosts)                            #mostrar hosts de la subred en 0
@@ -68,6 +73,10 @@ def set_subnet(ip,index,subnets_,hosts):
     reset_content_scroll(frame_hosts)                       #borrar contenido
     ip=subnets_[int(index)] if subnets_ else ip             #si no hay la subredes mandar la ip original
     hosts_=compute.array_hosts(ip,hosts)                    #obtener nuevos datos
+    if len(hosts_)>1024:
+        messagebox.showinfo("Demasiados resultados","Se muestra una parte de los hosts")
+        hosts_=hosts_[:1024]
+
     new_frame2=create_scroll_frame(frame_hosts,len(hosts_)) #crear nueva area de scroll
     for i,hosts in enumerate(hosts_):
         btn1=Button(new_frame2,text=f'{i+1} --> {hosts}',background=verde,highlightbackground="#000",highlightthickness=1,cursor="hand1")
@@ -137,7 +146,7 @@ label_subredes.grid(row=3,column=9,sticky=W+E+S+N)
 list_font=font.Font(family="Consolas",size=9,weight="bold")#labels de las listas
 label8=Label(frame,text="{:^32}".format("Lista de subredes"),font=list_font,highlightbackground="#000",highlightthickness=1)
 label8.grid(row=6,column=0,columnspan=8,sticky=W+E,padx=(0,15),pady=20)
-label_hosts=Label(frame,text="{:^32}".format("Lista de host de la subred   1"),font=list_font,highlightbackground="#000",highlightthickness=1)
+label_hosts=Label(frame,text="{:^32}".format("Lista de host de la subred    "),font=list_font,highlightbackground="#000",highlightthickness=1)
 label_hosts.grid(row=6,column=9,sticky=W+E)
 
 frame_subnets=Frame(frame)                                 #panel subredes
