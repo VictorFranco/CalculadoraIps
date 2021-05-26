@@ -4,6 +4,8 @@ import re
 def get_class(ip):
     octetos=[int(i) for i in ip.split(".")]
     bits=ip_to_bits(octetos)
+    if bits[:8]=="00001010"or bits[:16]=="1010110000010000"or bits[:16]=="1100000010101000":
+        return "Privada"
     if bits[:1]=="0":        #1-127
         return "Clase A"
     if bits[:2]=="10":       #128-191
@@ -17,13 +19,21 @@ def get_class(ip):
 
 def get_mask(ip):
     clase=get_class(ip)
+    octetos=[int(i) for i in ip.split(".")]
+    bits=ip_to_bits(octetos)
     if clase=="Clase A":
-        return "255.0.0.0"
+        return "255.0.0.0"                  #-->8
     if clase=="Clase B":
-        return "255.255.0.0"
+        return "255.255.0.0"                #-->16
     if clase=="Clase C":
-        return "255.255.255.0"
-    return ""
+        return "255.255.255.0"              #-->24
+    if clase=="Privada":
+        if bits[:8]=="00001010":            #10.0.0.0
+            return "255.0.0.0"              #-->8
+        if bits[:16]=="1010110000010000":   #172.16.0.0
+            return "255.240.0.0"             #-->12
+        if bits[:16]=="1100000010101000":   #192.168.0.0
+            return "255.255.0.0"            #-->16
 
 def identificar(ip):
     clase=get_class(ip)
