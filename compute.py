@@ -46,9 +46,8 @@ def get_subnet(ip,subnets=0,hosts=0,prefix=0):
     if not mask:
         return (None,)*3
 
-    bytes_host=[i for i in mask.split(".") if i=="0"]
-    host_bits=len(bytes_host)*8             #obtener bits disponibles
     mask_bits=ip_to_bits(mask.split("."))
+    host_bits=len(mask_bits)-len(bin(int(mask_bits[::-1],2))[2:])
     if 32>prefix>len(mask_bits.split("1")): #si el prefijo esta en el rango
         static_host=32-host_bits            #buscar host fijos
         bits_req=prefix-static_host         #bits_req=bits de la subnet
@@ -72,8 +71,8 @@ def get_subnet(ip,subnets=0,hosts=0,prefix=0):
     return (num_subnets,num_hosts,prefix)
 
 def subdivision(mask,size):
-    bytes_host=[i for i in mask.split(".") if i=="0"]
-    host_bits=len(bytes_host)*8             #numero de bits de host de la red
+    mask_bits=ip_to_bits(mask.split("."))
+    host_bits=len(mask_bits)-len(bin(int(mask_bits[::-1],2))[2:])
     if size>2:                              #si es posible hacer el logaritmo
         n=math.log(size+2,2)                #host o subnets=2^n-2
         bits_required=math.ceil(n)          #redondear
@@ -83,8 +82,8 @@ def subdivision(mask,size):
 
 def get_prefix(ip,bits_subnets):
     mask=get_mask(ip)
-    bytes_host=[i for i in mask.split(".") if i=="0"]
-    host_bits=len(bytes_host)*8              #obtener bits disponibles
+    mask_bits=ip_to_bits(mask.split("."))
+    host_bits=len(mask_bits)-len(bin(int(mask_bits[::-1],2))[2:])
     bits_static_net=32-host_bits             #numero de bits estaticos red
     return str(bits_subnets+bits_static_net)
 
@@ -104,16 +103,15 @@ def get_submask(prefix):
 
 def array_subnets(ip,subnets,prefix):
     mask=get_mask(ip)                                           #obtener mask
-    long_host=len([i for i in mask.split(".") if i=="255"])     #size array fijo
-    ip_bytes=ip.split(".")                                      #ip en array
-    ip_bytes=ip_bytes[:long_host]+(4-long_host)*["0"]           #limpiar area de host
-    ip_bits=ip_to_bits(ip_bytes)
+    ip_bits=ip_to_bits(ip.split("."))                           #obtener ip in bits
+    mask_bits=ip_to_bits(mask.split("."))                       #obtener bits mask
+    num_host_bits=len(mask_bits)-len(bin(int(mask_bits[::-1],2))[2:])#num de host de red
+    num_redes=32-num_host_bits                                  #num de redes
     array_subnets=[]
     for i in range(1,int(subnets)+1):                           #recorrer numeros de subnets
-        serie=(long_host)*8*"0"+bin(i)[2:].zfill(int(prefix)-long_host*8) #crear ip con las subredes
-        serie_="{:<032s}".format(serie)                         #32 bits de ip
-        bits_subnet=bin(int(str(ip_bits),2)|int(serie_,2))[2:]  #deducir apartir de bits
-        array_subnets.append(bits_to_ip(bits_subnet))
+        aux=ip_bits[:num_redes]+bin(i)[2:].zfill(int(prefix)-num_redes)
+        ip_bits="{:<032s}".format(aux)                         #32 bits de ip
+        array_subnets.append(bits_to_ip(ip_bits))
     return array_subnets
 
 def array_hosts(ip_subnet,hosts):
