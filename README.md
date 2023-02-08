@@ -28,3 +28,6 @@ El programa mostrar&aacute;:
 
 ![cap1](https://i.imgur.com/Sgvf3wI.jpg "Aplicaci&oacute;n en ejecuci&oacute;n")
 ![cap2](https://i.imgur.com/9tQ01U3.jpg "Prueba")
+
+## LICENSE
+[GPLv3.0](LICENSE)
